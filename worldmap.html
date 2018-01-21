@@ -1,0 +1,131 @@
+
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">         
+ <title>World Map</title>  
+ <style>
+.map_path {
+	stroke: black;
+	stroke-width: 1;
+}
+
+.grid_path{
+	stroke: gray;
+	stroke-width: 1;
+	fill:white;
+	opacity: 1;
+}
+
+ </style>
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="container">
+	<div class="row">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+              <h3 class="panel-title">世界地图</h3>
+            </div>
+            <div class="panel-body">
+                <div class="col-sm-8">
+                    <div id="map"></div>
+                </div>
+
+                <div class="col-sm-4">
+                    <form role="form">
+                      <div class="form-group">
+                        <label>投影</label>
+                        <select class="form-control" id="select-map-projection">
+                          <option value="1">墨卡托投影（等角正切圆柱投影）</option>
+                          <option value="2">等角正切方位投影</option>
+                          <option value="3">Albers等面积圆锥投影</option>
+                          <option value="4"></option>
+                          <option>Albers复合投影(适用于美国)</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                          <label>比例尺</label>
+                          <input id="map-scale" class="form-control" value="150"/>
+                      </div>
+                      <div class="form-group pull-right">
+                          <button id="btn-draw-map" type="button" class="btn btn-lg btn-success" >绘制</button>
+                      </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+function drawEarth ( projection ){
+	var width  = 754;
+	var height = 754;
+	
+	var svg = d3.select("#map").append("svg")
+	    .attr("width", width)
+	    .attr("height", height);
+						
+	var graticule = d3.geoGraticule();
+	
+	var path = d3.geoPath()
+					.projection(projection);
+	
+	d3.json("world.json", function(error, root) {
+		if (error) 
+			return console.error(error);
+		
+		var grid = graticule();
+		var map = svg.append("g")
+					 .attr("transform", "translate(" +  -100 + "," + 40 + ")");
+		
+		map.append("path")
+			.datum( grid )
+			.attr("id","grid_id")
+			.attr("class","grid_path")
+			.attr("d",path);
+		
+		map.selectAll(".map_path")
+				.data( root.features )
+				.enter()
+				.append("path")
+				.attr("class","map_path")
+				.attr("fill",function(d,i){
+					return "#81DBC6";
+				}).attr("d", path );
+		
+	});
+}
+
+$(document).ready(function(){
+    drawEarth(d3.geoMercator().scale(120));
+    $("#btn-draw-map").click(function () {
+        var selprojection = $("#select-map-projection").children('option:selected').val();
+        var mapScale = parseInt($("#map-scale").val());
+        var projection = null;
+        switch (parseInt(selprojection)){
+            case 1:
+                projection = d3.geoMercator().scale(mapScale);
+                break;
+            case 2:
+                projection = d3.geoOrthographic().scale(mapScale);
+                break;
+            case 3:
+                projection = d3.geoConicConformal().scale(mapScale);
+        }
+        $("#map").empty();
+        if ( projection != null){
+            drawEarth(projection);
+        }
+    });
+});
+</script>
+
+</body>
+</html>
