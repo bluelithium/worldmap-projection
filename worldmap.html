@@ -39,14 +39,16 @@
                         <label>投影</label>
                         <select class="form-control" id="select-map-projection">
                           <option value="1">墨卡托投影（等角正切圆柱投影）</option>
-                          <option value="2">等角正切方位投影</option>
-                          <option value="3">Albers等面积圆锥投影</option>
-                          <option value="4"></option>
-                          <option>Albers复合投影(适用于美国)</option>
+                          <option value="2">方位角直角投影</option>
+                          <option value="3">圆锥正形投影</option>
+                          <option value="4">方位角立体投影</option>
+                          <option value="5">等角投影（普通圆柱投影）</option>
+                          <option value="6">球心投影</option>
+                          <option value="7">横向墨卡托投影</option>
                         </select>
                       </div>
                       <div class="form-group">
-                          <label>比例尺</label>
+                          <label>比例尺<font style="color: gray">（设置不同的比例尺，获取更好的展示效果）</font></label>
                           <input id="map-scale" class="form-control" value="150"/>
                       </div>
                       <div class="form-group pull-right">
@@ -65,8 +67,7 @@
 
 <script>
 function drawEarth ( projection ){
-	var width  = 754;
-	var height = 754;
+	var width  = 754; var height = 754;
 	
 	var svg = d3.select("#map").append("svg")
 	    .attr("width", width)
@@ -118,6 +119,20 @@ $(document).ready(function(){
                 break;
             case 3:
                 projection = d3.geoConicConformal().scale(mapScale);
+                break;
+            case 4:
+            	projection = d3.geoStereographic().scale(mapScale);
+            	break;
+            case 5:
+            	projection = d3.geoEquirectangular().scale(mapScale);
+            	break;
+            case 6:
+            	projection = d3.geoGnomonic().scale(mapScale);
+            	break;
+            case 7:
+            	projection = d3.geoTransverseMercator().scale(mapScale);
+            	break;
+            
         }
         $("#map").empty();
         if ( projection != null){
